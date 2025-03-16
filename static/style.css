@@ -1,0 +1,133 @@
+/* Général */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+}
+
+/* Conteneur principal */
+.container {
+    background: white;
+    padding: 20px;
+    max-width: 600px;
+    margin: auto;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Formulaire */
+input, select, button {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+/* Bouton principal */
+button {
+    background: blue;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+}
+
+button:hover {
+    background: darkblue;
+}
+
+/* Liste des tickets */
+.ticket {
+    background: white;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 5px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+    text-align: left;
+}
+
+.ticket strong {
+    display: block;
+    font-size: 18px;
+    color: #333;
+}
+
+/* Boutons Résolu & Supprimer */
+button.resolve {
+    background: green;
+}
+
+button.resolve:hover {
+    background: darkgreen;
+}
+
+button.delete {
+    background: red;
+}
+
+button.delete:hover {
+    background: darkred;
+}
+.comments {
+    margin-top: 10px;
+    padding: 10px;
+    background: #f9f9f9;
+    border-radius: 5px;
+    text-align: left;
+}
+
+.comments h4 {
+    margin: 5px 0;
+    font-size: 16px;
+}
+
+.comments input {
+    width: 80%;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.comments button {
+    background: #007BFF;
+    color: white;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.comments button:hover {
+    background: #0056b3;
+}
+.comment-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f9f9f9;
+    padding: 5px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+.comment-text {
+    flex: 1;
+    font-size: 14px;
+}
+
+.comment-delete {
+    background: none;
+    color: red;
+    font-size: 18px; /* Agrandir la croix rouge */
+    padding: 0;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.comment-delete:hover {
+    color: darkred;
+    transform: scale(1.2); /* Effet de zoom au survol */
+}
