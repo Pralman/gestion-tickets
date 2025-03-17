@@ -132,7 +132,27 @@ async function deleteComment(ticketId, commentIndex) {
     fetchTickets();
 }
 
+async function resolveTicket(id) {
+    console.log("resolveTicket() chamada para o ticket:", id);
+    await fetch(`https://gestion-tickets-h93q.onrender.com/tickets/${id}`, { method: "PUT" });
+    fetchTickets();
+}
+
 window.resolveTicket = resolveTicket;
+async function deleteTicket(id) {
+    console.log("deleteTicket() chamada para o ticket:", id);
+    if (!confirm("Você realmente deseja excluir este ticket?")) return;
+    
+    const response = await fetch(`https://gestion-tickets-h93q.onrender.com/tickets/${id}`, { method: "DELETE" });
+    
+    if (!response.ok) {
+        alert("Erro ao excluir o ticket!");
+        return;
+    }
+    
+    fetchTickets();
+}
+
 window.deleteTicket = deleteTicket;
 window.addComment = addComment;
 window.deleteComment = deleteComment;
@@ -141,6 +161,7 @@ fetchTickets();
 </script>
 </body>
 </html>
+
 
 
 
