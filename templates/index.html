@@ -2,25 +2,25 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Gestion des Tickets</title>
+    <title>Gestão de Tickets</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <h1>Gestion des Tickets</h1>
 
     <!-- Formulaire pour ajouter un ticket -->
-    <input type="text" id="ticketName" placeholder="Nom du ticket">
-    <input type="text" id="ticketAction" placeholder="Action à réaliser">
+    <input type="text" id="ticketName" placeholder="Nome do ticket">
+    <input type="text" id="ticketAction" placeholder="Ação a realizar">
     <select id="ticketStatus">
-        <option value="Colis en retard">Colis en retard</option>
-        <option value="Colis endommagé">Colis endommagé</option>
-        <option value="Erreur produit">Erreur produit</option>
-        <option value="Erreur adresse">Erreur adresse</option>
-        <option value="Autres">Autres</option>
+        <option value="Pacote atrasado">Colis en retard</option>
+        <option value="Pacote danificado">Colis endommagé</option>
+        <option value="Erro no produto">Erreur produit</option>
+        <option value="Erro no endereço">Erreur adresse</option>
+        <option value="Outros">Autres</option>
     </select>
-    <button id="createTicketButton">Créer un Ticket</button>
+    <button id="createTicketButton">Criar um Ticket</button>
 
-    <h2>Liste des Tickets</h2>
+    <h2>Lista de Tickets</h2>
     <ul id="ticketList"></ul>
 
 <script>
@@ -40,13 +40,13 @@ async function fetchTickets() {
             <p><em>${ticket.status}</em> | <span style="color:gray;">🗓 ${ticket.created_at}</span></p>
             <p>📌 Action : ${ticket.action}</p>
             <button style="background: green; color: white;" onclick="resolveTicket(${ticket.id})">
-                ${ticket.resolved ? "✅ Résolu" : "Marquer comme résolu"}
+                ${ticket.resolved ? "✅ Resolvido" : "Marcar como resolvido"}
             </button>
             <button style="background: red; color: white;" onclick="deleteTicket(${ticket.id})">
-                ❌ Supprimer
+                ❌ Excluir
             </button>
             <div class="comments">
-                <h4>Commentaires</h4>
+                <h4>Comentários</h4>
                 <div id="comments-${ticket.id}">
                     ${(ticket.comments || []).map((c, index) => `
                         <div class="comment-container">
@@ -55,8 +55,8 @@ async function fetchTickets() {
                         </div>
                     `).join('')}
                 </div>
-                <input type="text" id="comment-input-${ticket.id}" placeholder="Ajouter un commentaire">
-                <button onclick="addComment(${ticket.id})">💬 Ajouter</button>
+                <input type="text" id="comment-input-${ticket.id}" placeholder="Adicionar um comentário">
+                <button onclick="addComment(${ticket.id})">💬 Adicionar</button>
             </div>
         `;
         list.appendChild(li);
@@ -69,7 +69,7 @@ async function createTicket() {
     const action = document.getElementById("ticketAction").value;
     const status = document.getElementById("ticketStatus").value;
     
-    if (!name || !action) return alert("Veuillez remplir tous les champs.");
+    if (!name || !action) return alert("Preencha todos os campos.");
     
     try {
         const response = await fetch("https://gestion-tickets-h93q.onrender.com/tickets", {
@@ -83,13 +83,13 @@ async function createTicket() {
 
         if (!response.ok) {
             const errorText = await response.text();
-            alert("Erreur lors de la création du ticket : " + errorText);
+            alert("Erro ao criar o ticket : " + errorText);
             return;
         }
         fetchTickets();
     } catch (error) {
         console.error("Erreur de connexion à l'API :", error);
-        alert("Impossible de contacter le serveur.");
+        alert("Não foi possível conectar ao servidor.");
     }
 }
 
@@ -101,12 +101,12 @@ async function resolveTicket(id) {
 }
 
 async function deleteTicket(id) {
-    if (!confirm("Voulez-vous vraiment supprimer ce ticket ?")) return;
+    if (!confirm("Você realmente deseja excluir este ticket ?")) return;
     
     const response = await fetch(`https://gestion-tickets-h93q.onrender.com/tickets/${id}`, { method: "DELETE" });
     
     if (!response.ok) {
-        alert("Erreur lors de la suppression du ticket !");
+        alert("Erro ao excluir o ticket !");
         return;
     }
     
@@ -120,6 +120,7 @@ fetchTickets();
 </script>
 </body>
 </html>
+
 
 
 
