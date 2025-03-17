@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Gestão de Tickets</title>
+    <title>Gestão dos Tickets</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -12,11 +12,11 @@
     <input type="text" id="ticketName" placeholder="Nome do ticket">
     <input type="text" id="ticketAction" placeholder="Ação a realizar">
     <select id="ticketStatus">
-        <option value="Pacote atrasado">Colis en retard</option>
-        <option value="Pacote danificado">Colis endommagé</option>
-        <option value="Erro no produto">Erreur produit</option>
-        <option value="Erro no endereço">Erreur adresse</option>
-        <option value="Outros">Autres</option>
+        <option value="Atraso da encomenda">Atraso da encomenda</option>
+        <option value="Produto chegou quebrado e/ou amassado">Produto chegou quebrado e/ou amassado</option>
+        <option value="Erro no produto enviado">Erro no produto enviado</option>
+        <option value="Erro no endereço">Erro no endereço</option>
+        <option value="Outros">Outros</option>
     </select>
     <button id="createTicketButton">Criar um Ticket</button>
 
@@ -120,8 +120,3 @@ fetchTickets();
 </script>
 </body>
 </html>
-
-
-
-
-
