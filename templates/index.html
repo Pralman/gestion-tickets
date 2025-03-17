@@ -39,12 +39,25 @@ async function fetchTickets() {
             <strong>${ticket.name}</strong>  
             <p><em>${ticket.status}</em> | <span style="color:gray;">🗓 ${ticket.created_at}</span></p>
             <p>📌 Action : ${ticket.action}</p>
-            <button onclick="resolveTicket(${ticket.id})">
+            <button style="background: green; color: white;" onclick="resolveTicket(${ticket.id})">
                 ${ticket.resolved ? "✅ Résolu" : "Marquer comme résolu"}
             </button>
-            <button onclick="deleteTicket(${ticket.id})">
+            <button style="background: red; color: white;" onclick="deleteTicket(${ticket.id})">
                 ❌ Supprimer
             </button>
+            <div class="comments">
+                <h4>Commentaires</h4>
+                <div id="comments-${ticket.id}">
+                    ${(ticket.comments || []).map((c, index) => `
+                        <div class="comment-container">
+                            <span class="comment-text">📝 ${c.text} <span style="color:gray;">(${c.date})</span></span>
+                            <span class="comment-delete" onclick="deleteComment(${ticket.id}, ${index})">&times;</span>
+                        </div>
+                    `).join('')}
+                </div>
+                <input type="text" id="comment-input-${ticket.id}" placeholder="Ajouter un commentaire">
+                <button onclick="addComment(${ticket.id})">💬 Ajouter</button>
+            </div>
         `;
         list.appendChild(li);
     });
@@ -80,23 +93,36 @@ async function createTicket() {
     }
 }
 
-// Assurer que createTicket est bien défini globalement
-window.createTicket = createTicket;
-
 document.getElementById("createTicketButton").addEventListener("click", createTicket);
 
-async function resolveTicket(id) {
-    await fetch(`/tickets/${id}`, { method: "PUT" });
+async function addComment(ticketId) {
+    const commentInput = document.getElementById(`comment-input-${ticketId}`);
+    const commentText = commentInput.value.trim();
+    
+    if (!commentText) return alert("Le commentaire ne peut pas être vide.");
+    
+    const response = await fetch(`/tickets/${ticketId}/comment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ comment: commentText })
+    });
+    
+    if (!response.ok) {
+        alert("Erreur lors de l'ajout du commentaire.");
+        return;
+    }
+    
+    commentInput.value = "";
     fetchTickets();
 }
 
-async function deleteTicket(id) {
-    if (!confirm("Voulez-vous vraiment supprimer ce ticket ?")) return;
+async function deleteComment(ticketId, commentIndex) {
+    if (!confirm("Voulez-vous vraiment supprimer ce commentaire ?")) return;
     
-    const response = await fetch(`/tickets/${id}`, { method: "DELETE" });
+    const response = await fetch(`/tickets/${ticketId}/comment/${commentIndex}`, { method: "DELETE" });
     
     if (!response.ok) {
-        alert("Erreur lors de la suppression du ticket !");
+        alert("Erreur lors de la suppression du commentaire.");
         return;
     }
     
@@ -107,5 +133,6 @@ fetchTickets();
 </script>
 </body>
 </html>
+
 
 
