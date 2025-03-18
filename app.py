@@ -4,17 +4,12 @@ from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
 
-# 📌 Assurer que le dossier `/data/` existe sur Render pour la base de données persistante
-DATA_DIR = os.getenv("HOME", "/tmp")  # Utilisation du dossier HOME sur Render ou /tmp
+# 📌 Assurer que le dossier de stockage de la base de données est accessible
+DATA_DIR = os.getenv("HOME", "/tmp")  # Utilisation du répertoire HOME de Render ou /tmp
 if not os.path.exists(DATA_DIR):
-    os.makedirs(DATA_DIR)  # Crée le dossier s'il n'existe pas
-
-DATABASE_DIR = os.getenv("DATABASE_DIR", os.path.expanduser("~"))  # Utilisation du home directory Render
-if not os.path.exists(DATA_DIR):
-    os.makedirs(DATA_DIR, exist_ok=True)  # Crée le dossier s'il n'existe pas
+    os.makedirs(DATA_DIR, exist_ok=True)  # Création du dossier s'il n'existe pas
 
 DATABASE_PATH = os.path.join(DATA_DIR, "database.db")
-
 
 # 📌 Initialiser la base de données SQLite
 def init_db():
