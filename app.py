@@ -4,9 +4,12 @@ from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
 
-# Initialiser la base de données SQLite
+# 📌 Emplacement persistant de la base de données pour Render
+DATABASE_PATH = os.path.join(os.getenv("HOME", "/data"), "database.db")
+
+# 📌 Initialiser la base de données SQLite
 def init_db():
-    conn = sqlite3.connect("database.db")
+    conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
     
     # Table des tickets
@@ -42,7 +45,7 @@ def home():
 # 📌 Route pour récupérer tous les tickets
 @app.route("/tickets", methods=["GET"])
 def get_tickets():
-    conn = sqlite3.connect("database.db")
+    conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT id, name, status, action, resolved FROM tickets")
     tickets = [{"id": row[0], "name": row[1], "status": row[2], "action": row[3], "resolved": bool(row[4])} for row in cursor.fetchall()]
@@ -62,7 +65,7 @@ def create_ticket():
     if not data or "name" not in data or "status" not in data or "action" not in data:
         return jsonify({"error": "Données invalides"}), 400
 
-    conn = sqlite3.connect("database.db")
+    conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
     cursor.execute("INSERT INTO tickets (name, status, action) VALUES (?, ?, ?)", (data["name"], data["status"], data["action"]))
     conn.commit()
@@ -74,7 +77,7 @@ def create_ticket():
 # 📌 Route pour marquer un ticket comme résolu
 @app.route("/tickets/<int:ticket_id>", methods=["PUT"])
 def resolve_ticket(ticket_id):
-    conn = sqlite3.connect("database.db")
+    conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
     cursor.execute("UPDATE tickets SET resolved = NOT resolved WHERE id = ?", (ticket_id,))
     conn.commit()
@@ -84,7 +87,7 @@ def resolve_ticket(ticket_id):
 # 📌 Route pour supprimer un ticket
 @app.route("/tickets/<int:ticket_id>", methods=["DELETE"])
 def delete_ticket(ticket_id):
-    conn = sqlite3.connect("database.db")
+    conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
     cursor.execute("DELETE FROM tickets WHERE id = ?", (ticket_id,))
     cursor.execute("DELETE FROM comments WHERE ticket_id = ?", (ticket_id,))  # Supprimer aussi les commentaires associés
@@ -99,7 +102,7 @@ def add_comment(ticket_id):
     if not data or "comment" not in data:
         return jsonify({"error": "Données invalides"}), 400
 
-    conn = sqlite3.connect("database.db")
+    conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
     cursor.execute("INSERT INTO comments (ticket_id, text) VALUES (?, ?)", (ticket_id, data["comment"]))
     conn.commit()
@@ -110,7 +113,7 @@ def add_comment(ticket_id):
 # 📌 Route pour supprimer un commentaire
 @app.route("/tickets/<int:ticket_id>/comment/<int:comment_id>", methods=["DELETE"])
 def delete_comment(ticket_id, comment_id):
-    conn = sqlite3.connect("database.db")
+    conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
     cursor.execute("DELETE FROM comments WHERE id = ? AND ticket_id = ?", (comment_id, ticket_id))
     conn.commit()
