@@ -4,8 +4,8 @@ from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
 
-# 📌 Emplacement persistant de la base de données pour Render
-DATABASE_PATH = os.path.join(os.getenv("HOME", "/data"), "database.db")
+# 📌 Emplacement persistant de la base de données sur Render
+DATABASE_PATH = os.path.join(os.getenv("DATABASE_PATH", "/data/database.db"))
 
 # 📌 Initialiser la base de données SQLite
 def init_db():
@@ -52,8 +52,8 @@ def get_tickets():
     
     # Ajouter les commentaires à chaque ticket
     for ticket in tickets:
-        cursor.execute("SELECT text FROM comments WHERE ticket_id = ?", (ticket["id"],))
-        ticket["comments"] = [{"text": row[0]} for row in cursor.fetchall()]
+        cursor.execute("SELECT id, text FROM comments WHERE ticket_id = ?", (ticket["id"],))
+        ticket["comments"] = [{"id": row[0], "text": row[1]} for row in cursor.fetchall()]
     
     conn.close()
     return jsonify(tickets)
