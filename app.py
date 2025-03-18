@@ -9,36 +9,38 @@ DATA_DIR = os.getenv("HOME", "/tmp")  # Utilisation du répertoire HOME de Rende
 if not os.path.exists(DATA_DIR):
     os.makedirs(DATA_DIR, exist_ok=True)  # Création du dossier s'il n'existe pas
 
-DATABASE_PATH = os.path.join(DATA_DIR, "database.db")
+DATABASE_PATH = os.getenv("DATABASE_PATH", os.path.join(os.getcwd(), "database.db"))
 
 # 📌 Initialiser la base de données SQLite
 def init_db():
-    conn = sqlite3.connect(DATABASE_PATH)
-    cursor = conn.cursor()
-    
-    # Table des tickets
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS tickets (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            status TEXT NOT NULL,
-            action TEXT NOT NULL,
-            resolved INTEGER DEFAULT 0
-        )
-    """)
+    if not os.path.exists(DATABASE_PATH):  # Vérifie si la base existe déjà
+        conn = sqlite3.connect(DATABASE_PATH)
+        cursor = conn.cursor()
+        
+        # Table des tickets
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS tickets (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                status TEXT NOT NULL,
+                action TEXT NOT NULL,
+                resolved INTEGER DEFAULT 0
+            )
+        """)
 
-    # Table des commentaires
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS comments (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            ticket_id INTEGER NOT NULL,
-            text TEXT NOT NULL,
-            FOREIGN KEY(ticket_id) REFERENCES tickets(id)
-        )
-    """)
+        # Table des commentaires
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS comments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                ticket_id INTEGER NOT NULL,
+                text TEXT NOT NULL,
+                FOREIGN KEY(ticket_id) REFERENCES tickets(id)
+            )
+        """)
 
-    conn.commit()
-    conn.close()
+        conn.commit()
+        conn.close()
+        print("✅ Base de données initialisée avec succès !")
 
 init_db()
 
@@ -60,6 +62,7 @@ def get_tickets():
         ticket["comments"] = [{"id": row[0], "text": row[1]} for row in cursor.fetchall()]
     
     conn.close()
+    print("Tickets récupérés depuis la base de données :", tickets)
     return jsonify(tickets)
 
 # 📌 Route pour créer un nouveau ticket
