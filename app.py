@@ -130,5 +130,5 @@ def delete_comment(ticket_id, comment_id):
     return jsonify({"message": "Commentaire supprimé"}), 200
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+port = int(os.getenv("PORT", "10000"))  # Render attribue parfois un port différent
+app.run(host="0.0.0.0", port=port, debug=True)
