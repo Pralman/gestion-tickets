@@ -62,7 +62,7 @@ def get_tickets():
         ticket["comments"] = [{"id": row[0], "text": row[1]} for row in cursor.fetchall()]
     
     conn.close()
-    print("Tickets récupérés depuis la base de données :", tickets)
+    print("✅ Tickets récupérés au démarrage :", tickets)  # Debugging
     return jsonify(tickets)
 
 # 📌 Route pour créer un nouveau ticket
