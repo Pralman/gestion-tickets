@@ -9,7 +9,8 @@ DATA_DIR = "/data"
 if not os.path.exists(DATA_DIR):
     os.makedirs(DATA_DIR)  # Crée le dossier s'il n'existe pas
 
-DATABASE_PATH = os.path.join(DATA_DIR, "database.db")
+DATABASE_DIR = os.getenv("DATABASE_DIR", os.path.expanduser("~"))  # Utilisation du home directory Render
+DATABASE_PATH = os.path.join(DATABASE_DIR, "database.db")
 
 # 📌 Initialiser la base de données SQLite
 def init_db():
