@@ -39,7 +39,7 @@ async function fetchTickets() {
         li.className = "ticket";
         li.innerHTML = `
             <strong>${ticket.name}</strong>  
-            <p><em>${ticket.status}</em> | <span style="color:gray;">🗓 ${ticket.created_at ? new Date(ticket.created_at).toLocaleDateString('pt-BR') : 'Data não disponível'}</span></p>
+            <p><em>${ticket.status}</em> | <span style="color:gray;">🗓 ${ticket.created_at ? new Date(ticket.created_at).toLocaleDateString('pt-BR', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Data não disponível'}</span></p>
             <p>📌 Ação: ${ticket.action}</p>
             <button style="background: green; color: white;" onclick="resolveTicket(${ticket.id})">
                 ${ticket.resolved ? "✅ Resolvido" : "Marcar como resolvido"}
@@ -159,12 +159,12 @@ async function addComment(ticketId) {
 }
 
 window.addComment = addComment;
-async function deleteComment(ticketId, commentIndex) {
-    console.log("deleteComment() chamada para o comentário:", ticketId, commentIndex);
+async function deleteComment(ticketId, commentId) {
+    console.log("deleteComment() chamada para o comentário:", ticketId, commentId);
     if (!confirm("Você realmente deseja excluir este comentário?")) return;
     
     try {
-        const response = await fetch(`https://gestion-tickets-h93q.onrender.com/tickets/${ticketId}/comment/${commentIndex}`, {
+        const response = await fetch(`https://gestion-tickets-h93q.onrender.com/tickets/${ticketId}/comment/${commentId}`, {
             method: "DELETE"
         });
 
@@ -186,6 +186,7 @@ fetchTickets();
 </script>
 </body>
 </html>
+
 
 
 
