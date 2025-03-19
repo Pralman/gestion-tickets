@@ -106,6 +106,7 @@ def delete_ticket(ticket_id):
 @app.route("/tickets/<int:ticket_id>/comment", methods=["POST"])
 def add_comment(ticket_id):
     data = request.json
+    print("Données reçues pour le commentaire :", data)  # Debug
     if not data or "text" not in data:
         return jsonify({"error": "Données invalides"}), 400
 

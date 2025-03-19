@@ -149,8 +149,8 @@ async function addComment(ticketId) {
                 "Accept": "application/json",
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ text: commentText }) // Envoi correct du champ "text"
-        });
+            body: JSON.stringify({ text: commentText })
+
 
         if (!response.ok) {
             const errorText = await response.text();
