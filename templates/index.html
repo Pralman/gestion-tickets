@@ -39,7 +39,8 @@ async function fetchTickets() {
         li.className = "ticket";
         li.innerHTML = `
             <strong>${ticket.name}</strong>  
-            <p><em>${ticket.status}</em> | <span style="color:gray;">🗓 ${ticket.created_at ? new Date(ticket.created_at).toLocaleDateString('pt-BR', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Data não disponível'}</span></p>
+            <p><em>${ticket.status}</em> | <span style="color:gray;">🗓 
+            ${ticket.created_at ? new Date(ticket.created_at).toLocaleDateString('pt-BR', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Data não disponível'}</span></p>
             <p>📌 Ação: ${ticket.action}</p>
             <button style="background: green; color: white;" onclick="resolveTicket(${ticket.id})">
                 ${ticket.resolved ? "✅ Resolvido" : "Marcar como resolvido"}
@@ -130,9 +131,6 @@ async function createTicket() {
     }
 }
 
-window.resolveTicket = resolveTicket;
-window.deleteTicket = deleteTicket;
-window.addComment = addComment;
 async function deleteComment(ticketId, commentId) {
     console.log("deleteComment() chamada para o comentário:", ticketId, commentId);
     if (!confirm("Você realmente deseja excluir este comentário?")) return;
@@ -154,9 +152,13 @@ async function deleteComment(ticketId, commentId) {
     }
 }
 
+window.resolveTicket = resolveTicket;
+window.deleteTicket = deleteTicket;
+window.addComment = addComment;
 window.deleteComment = deleteComment;
 
 fetchTickets();
 </script>
 </body>
 </html>
+
