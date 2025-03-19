@@ -106,7 +106,12 @@ async function createTicket() {
     const action = document.getElementById("ticketAction").value;
     const status = document.getElementById("ticketStatus").value;
     
-    if (!name || !action) return alert("Preencha todos os campos.");
+    console.log("createTicket() avant vérification du formulaire");
+      if (!name || !action) {
+        alert("Preencha todos os campos.");
+        return;
+      }
+    console.log("createTicket() après vérification du formulaire");
     
     try {
         const response = await fetch("https://gestion-tickets-h93q.onrender.com/tickets", {
