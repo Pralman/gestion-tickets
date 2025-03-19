@@ -106,13 +106,13 @@ def delete_ticket(ticket_id):
 @app.route("/tickets/<int:ticket_id>/comment", methods=["POST"])
 def add_comment(ticket_id):
     data = request.json
-    print("Données reçues pour le commentaire :", data)  # Debug
+    print("Données reçues pour le commentaire :", data)  # Debugging
     if not data or "text" not in data:
         return jsonify({"error": "Données invalides"}), 400
 
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO comments (ticket_id, text) VALUES (?, ?)", (ticket_id, data["comment"]))
+    cursor.execute("INSERT INTO comments (ticket_id, text) VALUES (?, ?)", (ticket_id, data["text"]))
     conn.commit()
     conn.close()
 
