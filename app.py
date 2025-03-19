@@ -106,7 +106,7 @@ def delete_ticket(ticket_id):
 @app.route("/tickets/<int:ticket_id>/comment", methods=["POST"])
 def add_comment(ticket_id):
     data = request.json
-    if not data or "comment" not in data:
+    if not data or "text" not in data:
         return jsonify({"error": "Données invalides"}), 400
 
     conn = sqlite3.connect(DATABASE_PATH)
