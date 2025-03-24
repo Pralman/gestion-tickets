@@ -9,7 +9,8 @@ DATA_DIR = os.getenv("HOME", "/tmp")  # Utilisation du répertoire HOME de Rende
 if not os.path.exists(DATA_DIR):
     os.makedirs(DATA_DIR, exist_ok=True)  # Création du dossier s'il n'existe pas
 
-DATABASE_PATH = os.getenv("DATABASE_PATH", os.path.join(os.getcwd(), "database.db"))
+DATABASE_PATH = os.getenv("DATABASE_PATH", "/persistent/database.db")
+
 
 # 📌 Initialiser la base de données SQLite
 def init_db():
