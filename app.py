@@ -1,46 +1,39 @@
 import os
 import sqlite3
+from datetime import datetime
 from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
 
-# 📌 Assurer que le dossier de stockage de la base de données est accessible
-DATA_DIR = os.getenv("HOME", "/tmp")  # Utilisation du répertoire HOME de Render ou /tmp
-if not os.path.exists(DATA_DIR):
-    os.makedirs(DATA_DIR, exist_ok=True)  # Création du dossier s'il n'existe pas
+# ✅ Base persistante sur Render
+DATABASE_PATH = os.getenv("DATABASE_PATH", "/opt/render/project/persistent/database.db")
 
-DATABASE_PATH = os.getenv("DATABASE_PATH", "/persistent/database.db")
-
-# 📌 Initialiser la base de données SQLite
 def init_db():
-    if not os.path.exists(DATABASE_PATH):  # Vérifie si la base existe déjà
+    if not os.path.exists(DATABASE_PATH):
+        print(f"📦 Création de la base à {DATABASE_PATH}")
         conn = sqlite3.connect(DATABASE_PATH)
         cursor = conn.cursor()
-        
-        # Table des tickets
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS tickets (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 status TEXT NOT NULL,
                 action TEXT NOT NULL,
+                created_at TEXT NOT NULL,
                 resolved INTEGER DEFAULT 0
             )
         """)
-
-        # Table des commentaires
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS comments (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 ticket_id INTEGER NOT NULL,
                 text TEXT NOT NULL,
+                date TEXT NOT NULL,
                 FOREIGN KEY(ticket_id) REFERENCES tickets(id)
             )
         """)
-
         conn.commit()
         conn.close()
-        print("✅ Base de données initialisée avec succès !")
 
 init_db()
 
@@ -48,40 +41,48 @@ init_db()
 def home():
     return render_template("index.html")
 
-# 📌 Route pour récupérer tous les tickets
 @app.route("/tickets", methods=["GET"])
 def get_tickets():
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
-    cursor.execute("SELECT id, name, status, action, resolved FROM tickets")
-    tickets = [{"id": row[0], "name": row[1], "status": row[2], "action": row[3], "resolved": bool(row[4])} for row in cursor.fetchall()]
-    
-    # Ajouter les commentaires à chaque ticket
-    for ticket in tickets:
-        cursor.execute("SELECT id, text FROM comments WHERE ticket_id = ?", (ticket["id"],))
-        ticket["comments"] = [{"id": row[0], "text": row[1]} for row in cursor.fetchall()]
-    
+
+    cursor.execute("SELECT id, name, status, action, created_at, resolved FROM tickets")
+    tickets = []
+    for row in cursor.fetchall():
+        ticket = {
+            "id": row[0],
+            "name": row[1],
+            "status": row[2],
+            "action": row[3],
+            "created_at": row[4],
+            "resolved": bool(row[5]),
+            "comments": []
+        }
+        cursor.execute("SELECT id, text, date FROM comments WHERE ticket_id = ?", (row[0],))
+        ticket["comments"] = [{"id": c[0], "text": c[1], "date": c[2]} for c in cursor.fetchall()]
+        tickets.append(ticket)
+
     conn.close()
-    print("✅ Tickets récupérés au démarrage :", tickets)  # Debugging
     return jsonify(tickets)
 
-# 📌 Route pour créer un nouveau ticket
 @app.route("/tickets", methods=["POST"])
 def create_ticket():
     data = request.json
-    if not data or "name" not in data or "status" not in data or "action" not in data:
-        return jsonify({"error": "Données invalides"}), 400
+    if not data or not all(k in data for k in ("name", "status", "action")):
+        return jsonify({"error": "Données manquantes"}), 400
+
+    created_at = datetime.now().isoformat()
 
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO tickets (name, status, action) VALUES (?, ?, ?)", (data["name"], data["status"], data["action"]))
+    cursor.execute("""
+        INSERT INTO tickets (name, status, action, created_at)
+        VALUES (?, ?, ?, ?)
+    """, (data["name"], data["status"], data["action"], created_at))
     conn.commit()
-    new_ticket_id = cursor.lastrowid
     conn.close()
+    return jsonify({"message": "Ticket créé"}), 201
 
-    return jsonify({"id": new_ticket_id, "name": data["name"], "status": data["status"], "action": data["action"], "resolved": False}), 201
-
-# 📌 Route pour marquer un ticket comme résolu
 @app.route("/tickets/<int:ticket_id>", methods=["PUT"])
 def resolve_ticket(ticket_id):
     conn = sqlite3.connect(DATABASE_PATH)
@@ -91,34 +92,32 @@ def resolve_ticket(ticket_id):
     conn.close()
     return jsonify({"message": "Ticket mis à jour"}), 200
 
-# 📌 Route pour supprimer un ticket
 @app.route("/tickets/<int:ticket_id>", methods=["DELETE"])
 def delete_ticket(ticket_id):
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
+    cursor.execute("DELETE FROM comments WHERE ticket_id = ?", (ticket_id,))
     cursor.execute("DELETE FROM tickets WHERE id = ?", (ticket_id,))
-    cursor.execute("DELETE FROM comments WHERE ticket_id = ?", (ticket_id,))  # Supprimer aussi les commentaires associés
     conn.commit()
     conn.close()
     return jsonify({"message": "Ticket supprimé"}), 200
 
-# 📌 Route pour ajouter un commentaire à un ticket
 @app.route("/tickets/<int:ticket_id>/comment", methods=["POST"])
 def add_comment(ticket_id):
     data = request.json
-    print("Données reçues pour le commentaire :", data)  # Debugging
+    print("📝 Données reçues :", data)
     if not data or "text" not in data:
-        return jsonify({"error": "Données invalides"}), 400
+        return jsonify({"error": "Texte manquant"}), 400
+
+    now = datetime.now().isoformat()
 
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO comments (ticket_id, text) VALUES (?, ?)", (ticket_id, data["text"]))
+    cursor.execute("INSERT INTO comments (ticket_id, text, date) VALUES (?, ?, ?)", (ticket_id, data["text"], now))
     conn.commit()
     conn.close()
+    return jsonify({"message": "Commentaire ajouté"}), 201
 
-    return jsonify({"message": "Commentaire ajouté avec succès"}), 201
-
-# 📌 Route pour supprimer un commentaire
 @app.route("/tickets/<int:ticket_id>/comment/<int:comment_id>", methods=["DELETE"])
 def delete_comment(ticket_id, comment_id):
     conn = sqlite3.connect(DATABASE_PATH)
@@ -128,9 +127,7 @@ def delete_comment(ticket_id, comment_id):
     conn.close()
     return jsonify({"message": "Commentaire supprimé"}), 200
 
-from flask import request
-import os
-
+# ✅ Route temporaire d'upload de la base
 @app.route("/upload-db", methods=["GET", "POST"])
 def upload_db():
     if request.method == "POST":
@@ -138,7 +135,6 @@ def upload_db():
         if not file or not file.filename.endswith(".db"):
             return "❌ Fichier invalide. Envoyez un fichier .db"
         
-        # Tentative vers un dossier sûr
         target_folder = "/opt/render/project/persistent"
         os.makedirs(target_folder, exist_ok=True)
         save_path = os.path.join(target_folder, "database.db")
@@ -150,7 +146,7 @@ def upload_db():
             return f"❌ Erreur lors de l'enregistrement : {e}"
 
     return '''
-    <h2>Uploader votre base SQLite</h2>
+    <h2>Uploader votre base SQLite (.db)</h2>
     <form method="POST" enctype="multipart/form-data">
         <input type="file" name="file" accept=".db">
         <button type="submit">Envoyer</button>
@@ -158,5 +154,5 @@ def upload_db():
     '''
 
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", "10000"))  # Render attribue parfois un port différent
-    app.run(host="0.0.0.0", port=port, debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
