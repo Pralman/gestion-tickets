@@ -128,21 +128,28 @@ def delete_comment(ticket_id, comment_id):
     conn.close()
     return jsonify({"message": "Commentaire supprimé"}), 200
 
-from flask import request, redirect
+import os
+from flask import request
 
 @app.route("/upload-db", methods=["GET", "POST"])
 def upload_db():
     if request.method == "POST":
         file = request.files.get("file")
         if file and file.filename.endswith(".db"):
-            file.save("/persistent/database.db")
-            return "✅ Base enregistrée dans /persistent/database.db"
+            # Créer le dossier si nécessaire
+            os.makedirs("/persistent", exist_ok=True)
+            path = "/persistent/database.db"
+            try:
+                file.save(path)
+                return f"✅ Base enregistrée avec succès à {path}"
+            except Exception as e:
+                return f"❌ Erreur lors de l'enregistrement : {e}"
         else:
-            return "❌ Fichier invalide (doit être un .db)"
-
-    # Affichage du formulaire HTML
+            return "❌ Fichier invalide. Veuillez envoyer un fichier .db"
+    
+    # Formulaire HTML simple
     return '''
-    <h2>Uploader votre fichier database.db</h2>
+    <h2>Uploader votre base database.db</h2>
     <form method="POST" enctype="multipart/form-data">
         <input type="file" name="file" accept=".db">
         <button type="submit">Envoyer</button>
