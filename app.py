@@ -11,7 +11,6 @@ if not os.path.exists(DATA_DIR):
 
 DATABASE_PATH = os.getenv("DATABASE_PATH", "/persistent/database.db")
 
-
 # 📌 Initialiser la base de données SQLite
 def init_db():
     if not os.path.exists(DATABASE_PATH):  # Vérifie si la base existe déjà
@@ -128,6 +127,27 @@ def delete_comment(ticket_id, comment_id):
     conn.commit()
     conn.close()
     return jsonify({"message": "Commentaire supprimé"}), 200
+
+from flask import request, redirect
+
+@app.route("/upload-db", methods=["GET", "POST"])
+def upload_db():
+    if request.method == "POST":
+        file = request.files.get("file")
+        if file and file.filename.endswith(".db"):
+            file.save("/persistent/database.db")
+            return "✅ Base enregistrée dans /persistent/database.db"
+        else:
+            return "❌ Fichier invalide (doit être un .db)"
+
+    # Affichage du formulaire HTML
+    return '''
+    <h2>Uploader votre fichier database.db</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".db">
+        <button type="submit">Envoyer</button>
+    </form>
+    '''
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "10000"))  # Render attribue parfois un port différent
